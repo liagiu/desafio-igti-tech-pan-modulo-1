@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IGTI - Módulo 1 - Desafio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <main>
+      <div class="left">
+        <h2 class="title">Options</h2>
+        <select name="sort-by" id="sort-by" onchange="selectedSort">
+          <option value="nome-ascendente" selected>Nome ascendente</option>
+          <option value="nome-descendente">Nome descendente</option>
+          <option value="salario-ascendente">Salário ascendente</option>
+          <option value="salario-descendente">Salário descendente</option>
+        </select>
+        <div class="checkboxes" onchange="filterBy"></div>
+      </div>
+      <div class="right">
+        <div class="bar-chart"></div>
+        <div class="table">
+          <h2 class="title">Employees (<span class="count"></span>)</h2>
+          <table class="employees-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Salary</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+    <script src="./js/main.js"></script>
+  </body>
+</html>
