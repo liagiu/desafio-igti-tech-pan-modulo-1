@@ -3,6 +3,7 @@ const checkboxes = document.querySelector(".checkboxes");
 const count = document.querySelector(".count");
 const employeesTableBody = document.querySelector(".employees-table tbody");
 const select = document.querySelector("#sort-by");
+const barChart = document.querySelector(".bar-chart");
 let roles;
 let employees;
 let sortedData;
@@ -112,6 +113,103 @@ function filterBy() {
   }
   sortedData = filteredData;
   createTable(selectedSort());
+}
+
+function createBarChart() {
+  barChart.innerHTML = "";
+  const height = barChart.offsetHeight;
+  const width = barChart.offsetWidth;
+  const marginY = height * 0.05;
+  const marginX = width * 0.05;
+  const countInt = parseInt(count.innerText);
+  const groupedBySalary = d3
+    .nest()
+    .key(function (d) {
+      return d.salary;
+    })
+    .entries(sortBy(sortedData, true, "salary"));
+
+  const yScale = d3
+    .scaleLinear()
+    .range([height * 0.85, 0])
+    .domain([0, 100]);
+
+  const xScale = d3
+    .scaleBand()
+    .range([0, width * 0.9])
+    .domain(groupedBySalary.map((d) => d.key))
+    .padding(0.5);
+
+  const chart = d3
+    .select(".bar-chart")
+    .append("svg")
+    .attr("width", 100 + "%")
+    .attr("height", 100 + "%");
+
+  chart
+    .append("g")
+    .attr("transform", `translate(${marginX},${marginY})`)
+    .call(d3.axisLeft(yScale))
+    .append("g")
+    .attr("transform", `translate(0, ${height * 0.85})`);
+
+  chart
+    .append("g")
+    .attr("transform", `translate(${width * 0.05}, ${height * 0.9})`)
+    .call(d3.axisBottom(xScale))
+    .selectAll(".tick text")
+    .attr("font-size", 0.45 + "rem")
+    .call(wrap, width * 0.05);
+
+  chart
+    .append("g")
+    .attr("transform", `translate(${marginX},${marginY})`)
+    .selectAll()
+    .data(groupedBySalary)
+    .enter()
+    .append("rect")
+    .attr("x", (d) => xScale(d.key))
+    .attr("y", (d) => yScale((d.values.length / countInt) * 100))
+    .attr(
+      "height",
+      (d) => yScale(0) - yScale((d.values.length / countInt) * 100)
+    )
+    .attr("width", xScale.bandwidth());
+}
+
+function wrap(text, width) {
+  text.each(function () {
+    var text = d3.select(this),
+      words = text.text().split(/\s+/).reverse(),
+      word,
+      line = [],
+      lineNumber = 0,
+      lineHeight = 1.1, // ems
+      y = text.attr("y"),
+      dy = parseFloat(text.attr("dy")),
+      tspan = text
+        .text(null)
+        .append("tspan")
+        .attr("x", 0)
+        .attr("y", y)
+        .attr("dy", dy + "em");
+
+    while ((word = words.pop())) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text
+          .append("tspan")
+          .attr("x", 0)
+          .attr("y", y)
+          .attr("dy", ++lineNumber * lineHeight + dy + "em")
+          .text(word);
+      }
+    }
+  });
 }
 
 select.addEventListener("change", selectedSort);
