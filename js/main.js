@@ -131,7 +131,7 @@ function createBarChart() {
 
   const yScale = d3
     .scaleLinear()
-    .range([height * 0.85, 0])
+    .range([height * 0.8, 0])
     .domain([0, 100]);
 
   const xScale = d3
@@ -151,11 +151,11 @@ function createBarChart() {
     .attr("transform", `translate(${marginX},${marginY})`)
     .call(d3.axisLeft(yScale))
     .append("g")
-    .attr("transform", `translate(0, ${height * 0.85})`);
+    .attr("transform", `translate(0, ${height * 0.8})`);
 
   chart
     .append("g")
-    .attr("transform", `translate(${width * 0.05}, ${height * 0.9})`)
+    .attr("transform", `translate(${width * 0.05}, ${height * 0.85})`)
     .call(d3.axisBottom(xScale))
     .selectAll(".tick text")
     .attr("font-size", 0.45 + "rem")
@@ -175,6 +175,23 @@ function createBarChart() {
       (d) => yScale(0) - yScale((d.values.length / countInt) * 100)
     )
     .attr("width", xScale.bandwidth());
+
+  chart
+    .append("text")
+    .attr("x", -(height / 2) + marginY)
+    .attr("y", width * 0.015)
+    .attr("transform", "rotate(-90)")
+    .attr("text-anchor", "middle")
+    .text("Employees (%)")
+    .attr("font-size", 0.85 + "rem");
+
+  chart
+    .append("text")
+    .attr("x", width / 2)
+    .attr("y", height * 0.98)
+    .attr("text-anchor", "middle")
+    .text("Salaries ($)")
+    .attr("font-size", 0.85 + "rem");
 }
 
 function wrap(text, width) {
