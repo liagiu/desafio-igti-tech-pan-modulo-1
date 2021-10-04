@@ -122,12 +122,15 @@ function createBarChart() {
   const marginY = height * 0.05;
   const marginX = width * 0.05;
   const countInt = parseInt(count.innerText);
+
   const groupedBySalary = d3
     .nest()
     .key(function (d) {
       return d.salary;
     })
-    .entries(sortBy(sortedData, true, "salary"));
+    .entries(
+      sortedData.slice().sort((a, b) => d3.ascending(a.salary, b.salary))
+    );
 
   const yScale = d3
     .scaleLinear()
