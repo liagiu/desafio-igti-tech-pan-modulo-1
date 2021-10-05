@@ -149,6 +149,8 @@ function createBarChart() {
     .attr("width", 100 + "%")
     .attr("height", 100 + "%");
 
+  const tooltip = d3.select(".tooltip");
+
   chart
     .append("g")
     .attr("transform", `translate(${marginX},${marginY})`)
@@ -178,6 +180,23 @@ function createBarChart() {
       (d) => yScale(0) - yScale((d.values.length / countInt) * 100)
     )
     .attr("width", xScale.bandwidth());
+
+  chart
+    .selectAll("rect")
+    .on("mouseover", function (d) {
+      tooltip
+        .html(
+          `${d.values.length} (${((d.values.length / countInt) * 100).toFixed(
+            1
+          )}%)`
+        )
+        .style("opacity", 1)
+        .style("left", d3.event.pageX + "px")
+        .style("top", d3.event.pageY - 33 + "px");
+    })
+    .on("mouseleave", (d) => {
+      tooltip.style("opacity", 0);
+    });
 
   chart
     .append("text")
