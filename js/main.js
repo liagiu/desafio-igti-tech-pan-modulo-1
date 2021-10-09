@@ -4,6 +4,9 @@ const count = document.querySelector(".count");
 const employeesTableBody = document.querySelector(".employees-table tbody");
 const select = document.querySelector("#sort-by");
 const barChart = document.querySelector(".bar-chart");
+const pieChart = document.querySelector(".pie-chart");
+const barLink = document.querySelector(".bar-chart-link");
+const pieLink = document.querySelector(".pie-chart-link");
 let roles;
 let employees;
 let sortedData;
@@ -27,6 +30,8 @@ fetch("http://localhost:3000/employees")
 function createCheckboxes(data) {
   checkboxes.innerHTML = "<h3>Filter by roles<h3>";
 
+  data.sort((a, b) => d3.ascending(a.name, b.name));
+
   for (let i = 0; i < data.length; i++) {
     checkboxes.innerHTML += `<p><input type="checkbox" id="${data[i].id}" value="${data[i].id}">${data[i].name}</p>`;
   }
@@ -49,8 +54,8 @@ function createTable() {
       roles[sortedData[i].role_id - 1].name
     }</td><td>${sortedData[i].salary}</td>`;
   }
-
-  createBarChart(sortedData);
+  createBarChart();
+  createPieChart();
 }
 
 function sortBy(data, asc, attr) {
@@ -163,8 +168,7 @@ function createBarChart() {
     .attr("transform", `translate(${width * 0.05}, ${height * 0.85})`)
     .call(d3.axisBottom(xScale))
     .selectAll(".tick text")
-    .attr("font-size", 0.45 + "rem")
-    .call(wrap, width * 0.05);
+    .attr("font-size", 0.45 + "rem");
 
   chart
     .append("g")
@@ -216,40 +220,86 @@ function createBarChart() {
     .attr("font-size", 0.85 + "rem");
 }
 
-function wrap(text, width) {
-  text.each(function () {
-    var text = d3.select(this),
-      words = text.text().split(/\s+/).reverse(),
-      word,
-      line = [],
-      lineNumber = 0,
-      lineHeight = 1.1, // ems
-      y = text.attr("y"),
-      dy = parseFloat(text.attr("dy")),
-      tspan = text
-        .text(null)
-        .append("tspan")
-        .attr("x", 0)
-        .attr("y", y)
-        .attr("dy", dy + "em");
+function createPieChart() {
+  pieChart.innerHTML = "";
+  const height = pieChart.offsetHeight;
+  const width = pieChart.offsetWidth;
+  const radius = Math.min(width, height) / 2 - 10;
 
-    while ((word = words.pop())) {
-      line.push(word);
-      tspan.text(line.join(" "));
-      if (tspan.node().getComputedTextLength() > width) {
-        line.pop();
-        tspan.text(line.join(" "));
-        line = [word];
-        tspan = text
-          .append("tspan")
-          .attr("x", 0)
-          .attr("y", y)
-          .attr("dy", ++lineNumber * lineHeight + dy + "em")
-          .text(word);
-      }
-    }
-  });
+  let groupedByRole = d3
+    .nest()
+    .key(function (d) {
+      return roles[d.role_id - 1].name;
+    })
+    .entries(sortedData);
+
+  groupedByRole.sort((a, b) => d3.ascending(a.key, b.key));
+
+  const pie = d3.pie().value((d) => d.values.length);
+  const data = pie(groupedByRole);
+
+  var color = d3
+    .scaleOrdinal()
+    .domain(data)
+    .range([
+      "#e3eef9",
+      "#cfe1f2",
+      "#bcdaf5",
+      "#a8d2ee",
+      "#84bedf",
+      "#6daed5",
+      "#4b97c9",
+      "#2f7ebc",
+      "#1864aa",
+      "#0a4a90",
+      "#08306b",
+      "#012150",
+    ]);
+
+  var chart = d3
+    .select(".pie-chart")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+  chart
+    .selectAll()
+    .data(data)
+    .enter()
+    .append("path")
+    .attr("d", d3.arc().innerRadius(0).outerRadius(radius))
+    .attr("fill", function (d) {
+      return color(d.index);
+    })
+    .attr("stroke", "#fff")
+    .style("stroke-width", "0.05rem");
 }
 
 select.addEventListener("change", selectedSort);
 checkboxes.addEventListener("change", filterBy);
+barLink.addEventListener("click", () => {
+  if (pieChart.style.display == "") {
+    pieChart.style.display = "none";
+  }
+
+  if (barChart.style.display == "") {
+    barChart.style.display = "none";
+  } else {
+    barChart.style.display = "";
+    createBarChart();
+  }
+});
+pieLink.addEventListener("click", () => {
+  if (barChart.style.display == "") {
+    barChart.style.display = "none";
+  }
+
+  if (pieChart.style.display == "") {
+    pieChart.style.display = "none";
+  } else {
+    pieChart.style.display = "";
+    createPieChart();
+  }
+});
